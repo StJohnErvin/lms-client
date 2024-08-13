@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebaseConfig';  // Import Firebase Firestore
+import { db } from '../firebase/firebaseConfig';  // Import Firebase Firestore
 
 function GamifiedTestList() {
   const [tests, setTests] = useState([]);
