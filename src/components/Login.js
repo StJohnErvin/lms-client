@@ -1,13 +1,10 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebaseConfig';  // Import Firebase auth
 import { UserContext } from '../context/UserContext';
 
 function Login() {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: ''
-  });
-
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const { setUser } = useContext(UserContext);
 
   const handleChange = (e) => {
@@ -16,8 +13,13 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await axios.post('/api/users/login', formData);
-    setUser(res.data);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, formData.username, formData.password);
+      setUser(userCredential.user);
+    } catch (error) {
+      console.error("Error logging in:", error);
+      alert('Login failed');
+    }
   };
 
   return (
@@ -33,5 +35,3 @@ function Login() {
 }
 
 export default Login;
-
-

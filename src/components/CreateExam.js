@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { collection, addDoc } from 'firebase/firestore';
+
 
 const CreateTest = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -38,14 +40,11 @@ const CreateTest = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const finalData = { ...formData, createdBy: 'Admin' };
+    const finalData = { ...formData, createdBy: auth.currentUser.uid };
+  
     try {
-      const response = await axios.post('http://localhost:5000/api/exams/create', finalData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      console.log('Response:', response.data);
+      const docRef = await addDoc(collection(db, "tests"), finalData);
+      console.log("Document written with ID: ", docRef.id);
       alert('Form submitted successfully');
       setCurrentStep(1);
       setFormData({
@@ -55,7 +54,7 @@ const CreateTest = () => {
         questions: [{ question: '', options: ['', '', '', ''], answer: '' }],
       });
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error adding document: ', error);
       alert('Error submitting form');
     }
   };
