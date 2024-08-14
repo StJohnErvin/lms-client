@@ -1,37 +1,71 @@
-import React, { useState, useContext } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase/firebaseConfig';  // Import Firebase auth
-import { UserContext } from '../context/UserContext';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function Login() {
+function FakeLogin() {
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const { setUser } = useContext(UserContext);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, formData.username, formData.password);
-      setUser(userCredential.user);
-    } catch (error) {
-      console.error("Error logging in:", error);
-      alert('Login failed');
-    }
+    setLoginSuccess(true);
+    // Simulate a successful login by storing user details
+    localStorage.setItem('user', JSON.stringify({ username: formData.username }));
+    // Navigate to the profile page
+    navigate('/profile');
   };
 
   return (
-    <div className="container mx-auto">
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="text" name="username" placeholder="Username" onChange={handleChange} required />
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
-        <button type="submit">Login</button>
-      </form>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-sm p-8 bg-white shadow-md rounded-md">
+        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">Login</h1>
+        {loginSuccess ? (
+          <div className="text-green-600 text-center">
+            <p>Login successful! Welcome, {formData.username}!</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                Username
+              </label>
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div className="mb-6">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+                Password
+              </label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300"
+            >
+              Login
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
 
-export default Login;
+export default FakeLogin;

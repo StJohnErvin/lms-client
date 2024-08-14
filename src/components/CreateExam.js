@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { collection, addDoc } from 'firebase/firestore';
-
+import { db } from '../firebase/firebaseConfig';
 
 const CreateTest = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -11,6 +10,13 @@ const CreateTest = () => {
     gameType: '',
     questions: [{ question: '', options: ['', '', '', ''], answer: '' }],
   });
+
+  // Hardcoded user data
+  const user = {
+    uid: 'fakeUserId', // Hardcoded user ID
+    name: 'Fake Teacher', // Hardcoded name
+    role: 'teacher' // Hardcoded role
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +46,7 @@ const CreateTest = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const finalData = { ...formData, createdBy: auth.currentUser.uid };
+    const finalData = { ...formData, createdBy: user.uid, role: user.role }; // Use hardcoded user details
   
     try {
       const docRef = await addDoc(collection(db, "tests"), finalData);
@@ -58,7 +64,6 @@ const CreateTest = () => {
       alert('Error submitting form');
     }
   };
-  
 
   return (
     <div className="container mx-auto px-4 py-6">
