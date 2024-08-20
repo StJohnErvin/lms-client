@@ -46,7 +46,7 @@ const CreateTest = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const finalData = { ...formData, createdBy: user.uid, role: user.role }; // Use hardcoded user details
+    const finalData = { ...formData, createdBy: user.uid, role: user.role };
   
     try {
       const docRef = await addDoc(collection(db, "tests"), finalData);
@@ -60,10 +60,11 @@ const CreateTest = () => {
         questions: [{ question: '', options: ['', '', '', ''], answer: '' }],
       });
     } catch (error) {
-      console.error('Error adding document: ', error);
-      alert('Error submitting form');
+      console.error('Error adding document: ', error.code, error.message);
+      alert(`Error submitting form: ${error.message}`);
     }
   };
+  
 
   return (
     <div className="container mx-auto px-4 py-6">
