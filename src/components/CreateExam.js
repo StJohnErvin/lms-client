@@ -47,7 +47,8 @@ const CreateTest = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const finalData = { ...formData, createdBy: user.uid, role: user.role };
-  
+    console.log('Submitting data:', finalData); // Debugging
+
     try {
       const docRef = await addDoc(collection(db, "tests"), finalData);
       console.log("Document written with ID: ", docRef.id);
@@ -64,7 +65,6 @@ const CreateTest = () => {
       alert(`Error submitting form: ${error.message}`);
     }
   };
-  
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -111,9 +111,10 @@ const CreateTest = () => {
                 value={formData.gameType}
                 onChange={handleChange}
               >
-                <option>Hangman</option>
-                <option>Jeopardy</option>
-                <option>Who Wants to Be a Millionaire?</option>
+                <option value="">Select a game type</option>
+                <option value="Hangman">Hangman</option>
+                <option value="Jeopardy">Jeopardy</option>
+                <option value="Who Wants to Be a Millionaire?">Who Wants to Be a Millionaire?</option>
               </select>
             </div>
             <button

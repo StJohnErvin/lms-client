@@ -21,8 +21,22 @@ function GamifiedTestList() {
     fetchTests();
   }, []);
 
-  const handlePlayGame = () => {
-    navigate('/hangman-game');  // Always navigate to the hangman game route
+  // Function to handle game navigation based on the game type
+  const handlePlayGame = (gameType) => {
+    switch (gameType) {
+      case 'Hangman':
+        navigate('/hangman-game');
+        break;
+      case 'Jeopardy':
+        navigate('/jeopardy-game');
+        break;
+      case 'Who Wants to Be a Millionaire?':
+        navigate('/millionaire-game');
+        break;
+      default:
+        console.error('Unknown game type:', gameType);
+        alert('Unknown game type');
+    }
   };
 
   return (
@@ -38,7 +52,7 @@ function GamifiedTestList() {
             </div>
             <button 
               className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded ml-4"
-              onClick={handlePlayGame}  // Always navigate to Hangman game
+              onClick={() => handlePlayGame(test.gameType)}  // Pass gameType to the handler
             >
               Play Game
             </button>
