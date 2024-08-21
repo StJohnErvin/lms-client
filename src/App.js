@@ -13,6 +13,7 @@ import HangmanGameTheme from './components/HangmanGameTheme';
 import JeopardyGameTheme from './components/JeopardyGameTheme';
 import MillionaireGameTheme from './components/MillionaireGameTheme';
 import Login from './components/Login';
+import EditTest from './components/EditTest';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -35,6 +36,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/account-management" element={<AccountManagement />} />
               <Route path="/create-test" element={<CreateTest />} />
+              <Route path="/edit-test/:testId" element={<EditTest />} />
               <Route path="/grades" element={<GradeEvaluation />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/gamified-test" element={<GamifiedTestList />} />
