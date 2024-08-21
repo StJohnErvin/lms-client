@@ -13,7 +13,7 @@ const CreateTest = () => {
 
   // Hardcoded user data
   const user = {
-    uid: 'fakeUserId', // Hardcoded user ID
+    uid: 'newUser', // Hardcoded user ID
     name: 'Fake Teacher', // Hardcoded name
     role: 'teacher' // Hardcoded role
   };
