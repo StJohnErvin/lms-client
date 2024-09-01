@@ -21,22 +21,9 @@ function GamifiedTestList() {
     fetchTests();
   }, []);
 
-  // Function to handle game navigation based on the game type
-  const handlePlayGame = (gameType) => {
-    switch (gameType) {
-      case 'Hangman':
-        navigate('/hangman-game');
-        break;
-      case 'Jeopardy':
-        navigate('/jeopardy-game');
-        break;
-      case 'Who Wants to Be a Millionaire?':
-        navigate('/millionaire-game');
-        break;
-      default:
-        console.error('Unknown game type:', gameType);
-        alert('Unknown game type');
-    }
+  // Function to navigate to the quiz page for the selected test
+  const handlePlayGame = (testId, gameType) => {
+    navigate(`/quiz/${testId}`, { state: { gameType } });
   };
 
   // Function to handle navigation to the Edit page
@@ -58,7 +45,7 @@ function GamifiedTestList() {
             </div>
             <button 
               className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded ml-4"
-              onClick={() => handlePlayGame(test.gameType)}
+              onClick={() => handlePlayGame(test.id, test.gameType)}  // Pass testId and gameType
             >
               Play Game
             </button>
@@ -68,6 +55,13 @@ function GamifiedTestList() {
             >
               Edit
             </button>
+            {test.materialURL && (
+              <p>
+                <a href={test.materialURL} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                  Download Materials
+                </a>
+              </p>
+            )}
           </li>
         ))}
       </ul>

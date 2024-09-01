@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig';
+import { db, storage } from '../firebase/firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const CreateTest = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -9,6 +10,7 @@ const CreateTest = () => {
     examTime: '',
     gameType: '',
     questions: [{ question: '', options: ['', '', '', ''], answer: '' }],
+    materials: null, // Add materials to the form data
   });
 
   // Hardcoded user data
@@ -21,6 +23,11 @@ const CreateTest = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData({ ...formData, materials: file });
   };
 
   const handleQuestionChange = (index, e) => {
@@ -46,8 +53,20 @@ const CreateTest = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const finalData = { ...formData, createdBy: user.uid, role: user.role };
-    console.log('Submitting data:', finalData); // Debugging
+    let materialURL = null;
+
+    if (formData.materials) {
+      const storageRef = ref(storage, `materials/${formData.materials.name}`);
+      const snapshot = await uploadBytes(storageRef, formData.materials);
+      materialURL = await getDownloadURL(snapshot.ref);
+    }
+
+    const finalData = { 
+      ...formData, 
+      createdBy: user.uid, 
+      role: user.role,
+      materialURL, // Add the material URL to the form data
+    };
 
     try {
       const docRef = await addDoc(collection(db, "tests"), finalData);
@@ -59,6 +78,7 @@ const CreateTest = () => {
         examTime: '',
         gameType: '',
         questions: [{ question: '', options: ['', '', '', ''], answer: '' }],
+        materials: null,
       });
     } catch (error) {
       console.error('Error adding document: ', error.code, error.message);
@@ -116,6 +136,17 @@ const CreateTest = () => {
                 <option value="Jeopardy">Jeopardy</option>
                 <option value="Who Wants to Be a Millionaire?">Who Wants to Be a Millionaire?</option>
               </select>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="materials">
+                Upload Materials
+              </label>
+              <input
+                type="file"
+                id="materials"
+                onChange={handleFileChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
             </div>
             <button
               type="button"

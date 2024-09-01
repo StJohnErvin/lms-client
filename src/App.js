@@ -14,6 +14,9 @@ import JeopardyGameTheme from './components/JeopardyGameTheme';
 import MillionaireGameTheme from './components/MillionaireGameTheme';
 import Login from './components/Login';
 import EditTest from './components/EditTest';
+import Quiz from './components/Quiz';
+import Announcements from './components/Announcements';
+import AddAnnouncement from './components/AddAnnouncement';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -32,7 +35,10 @@ function App() {
           <>
             <Navbar />
             <Routes>
-              <Route path="/" element={<Profile />} />
+              <Route path="/" element={<Announcements />} />
+              <Route path="/quiz/:testId" element={<Quiz />} />
+              <Route path="/announcements" element={<Announcements />} />
+              <Route path="/add-announcement" element={<AddAnnouncement />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/account-management" element={<AccountManagement />} />
               <Route path="/create-test" element={<CreateTest />} />
