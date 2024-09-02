@@ -1,7 +1,9 @@
+// src/components/GamifiedTestList.js
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { db, storage } from '../firebase/firebaseConfig';
 import { useNavigate } from 'react-router-dom';
+import { ref, deleteObject } from 'firebase/storage';
 
 function GamifiedTestList() {
   const [tests, setTests] = useState([]);
@@ -31,40 +33,69 @@ function GamifiedTestList() {
     navigate(`/edit-test/${testId}`);
   };
 
+  // Function to handle deleting a test
+  const handleDeleteTest = async (testId, materialURL) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this test? This action cannot be undone.');
+    if (!confirmDelete) return;
+
+    try {
+      // If there is a material URL, delete the file from Firebase Storage
+      if (materialURL) {
+        const fileRef = ref(storage, materialURL);
+        await deleteObject(fileRef);
+      }
+
+      // Delete the test document from Firestore
+      await deleteDoc(doc(db, 'tests', testId));
+
+      // Update the local state to remove the deleted test
+      setTests(prevTests => prevTests.filter(test => test.id !== testId));
+      alert('Test deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting test:', error);
+      alert('Failed to delete the test. Please try again.');
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl mb-4">Gamified Tests</h1>
-      <ul className="space-y-4">
-        {tests.map((test) => (
-          <li key={test.id} className="border p-4 flex items-center">
-            <div className="flex-1">
-              <h2 className="text-lg font-medium mb-2">{test.testName}</h2>
-              <p className="mb-2">Game Type: {test.gameType}</p>
-              <p className="mb-2">Exam Time: {test.examTime}</p> {/* Added examTime */}
-              <p className="mb-2">Created By: {test.createdBy}</p>
-            </div>
-            <button 
-              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded ml-4"
-              onClick={() => handlePlayGame(test.id, test.gameType)}  // Pass testId and gameType
-            >
-              Play Game
-            </button>
-            <button 
-              className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded ml-4"
-              onClick={() => handleEditTest(test.id)}  // Navigate to Edit page
-            >
-              Edit
-            </button>
-            {test.materialURL && (
-              <p>
-                <a href={test.materialURL} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                  Download Materials
-                </a>
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
+      {tests.length > 0 ? (
+        <ul className="space-y-4">
+          {tests.map((test) => (
+            <li key={test.id} className="border p-4 flex items-center justify-between">
+              <div className="flex-1">
+                <h2 className="text-lg font-medium mb-2">{test.testName}</h2>
+                <p className="mb-1"><strong>Game Type:</strong> {test.gameType}</p>
+                <p className="mb-1"><strong>Exam Time:</strong> {test.examTime} minutes</p>
+                <p className="mb-1"><strong>Created By:</strong> {test.createdBy}</p>
+              </div>
+              <div className="flex space-x-2">
+                <button 
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+                  onClick={() => handlePlayGame(test.id, test.gameType)}
+                >
+                  Play Game
+                </button>
+                <button 
+                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                  onClick={() => handleEditTest(test.id)}
+                >
+                  Edit
+                </button>
+                <button 
+                  className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+                  onClick={() => handleDeleteTest(test.id, test.materialURL)}
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No gamified tests available.</p>
+      )}
     </div>
   );
 }
