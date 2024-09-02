@@ -35,7 +35,7 @@ function App() {
           <>
             <Navbar />
             <Routes>
-              <Route path="/" element={<Announcements />} />
+              <Route path="/" element={<Profile />} />
               <Route path="/quiz/:testId" element={<Quiz />} />
               <Route path="/announcements" element={<Announcements />} />
               <Route path="/add-announcement" element={<AddAnnouncement />} />
