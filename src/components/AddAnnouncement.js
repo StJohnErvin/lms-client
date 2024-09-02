@@ -1,67 +1,64 @@
-// src/components/AddAnnouncement.js
 import React, { useState } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig';
-import { useNavigate } from 'react-router-dom';
+import { db, storage } from '../firebase/firebaseConfig';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const AddAnnouncement = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const navigate = useNavigate();
+  const [file, setFile] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const handleAddAnnouncement = async (e) => {
     e.preventDefault();
 
+    let materialURL = '';
+
+    if (file) {
+      const fileRef = ref(storage, `announcements/${file.name}`);
+      await uploadBytes(fileRef, file);
+      materialURL = await getDownloadURL(fileRef);
+    }
+
     try {
-      const announcement = {
+      await addDoc(collection(db, 'announcements'), {
         title,
         content,
-        date: new Date().toLocaleDateString(),
-      };
-
-      await addDoc(collection(db, 'announcements'), announcement);
-      navigate('/announcements'); // Redirect to the announcements page after submission
+        materialURL,
+        createdAt: serverTimestamp(),
+      });
+      setTitle('');
+      setContent('');
+      setFile(null);
     } catch (error) {
       console.error('Error adding announcement:', error);
     }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl mb-4">Add New Announcement</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Title
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Content
-          </label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            rows="5"
-            required
-          ></textarea>
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-        >
-          Post Announcement
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleAddAnnouncement} className="p-4">
+      <h2 className="text-2xl mb-4">Add Announcement</h2>
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full mb-4 p-2 border"
+      />
+      <textarea
+        placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full mb-4 p-2 border"
+      ></textarea>
+      <input
+        type="file"
+        onChange={(e) => setFile(e.target.files[0])}
+        className="mb-4"
+      />
+      <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+        Add Announcement
+      </button>
+    </form>
   );
 };
 
