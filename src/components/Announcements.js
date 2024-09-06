@@ -12,7 +12,11 @@ const AnnouncementPage = () => {
     const fetchAnnouncements = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'announcements'));
-        const announcementsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const announcementsList = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return { id: doc.id, ...data };
+        });
+
         setAnnouncements(announcementsList);
       } catch (error) {
         console.error('Error fetching announcements:', error);
@@ -39,12 +43,26 @@ const AnnouncementPage = () => {
       });
       setEditMode(null);
       setAnnouncements(
-        announcements.map(announcement => 
+        announcements.map(announcement =>
           announcement.id === id ? { ...announcement, title: editTitle, content: editContent } : announcement
         )
       );
     } catch (error) {
       console.error('Error editing announcement:', error);
+    }
+  };
+
+  const renderAttachment = (url) => {
+    if (!url) return <p>No attachment</p>;
+
+    const fileExtension = url.split('.').pop().toLowerCase();
+    
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      return <img src={url} alt="Attachment" className="w-full h-auto" />;
+    } else if (['pdf'].includes(fileExtension)) {
+      return <a href={url} target="_blank" rel="noopener noreferrer">View PDF</a>;
+    } else {
+      return <a href={url} target="_blank" rel="noopener noreferrer">Download Attachment</a>;
     }
   };
 
@@ -84,11 +102,9 @@ const AnnouncementPage = () => {
               <>
                 <h2 className="text-xl">{announcement.title}</h2>
                 <p>{announcement.content}</p>
-                {announcement.materialURL && (
-                  <a href={announcement.materialURL} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                    Download Materials
-                  </a>
-                )}
+                <div className="mt-2">
+                  {renderAttachment(announcement.materialURL)}
+                </div>
                 <div className="mt-2">
                   <button
                     onClick={() => {

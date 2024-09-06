@@ -67,7 +67,7 @@ function GamifiedTestList() {
               <div className="flex-1">
                 <h2 className="text-lg font-medium mb-2">{test.testName}</h2>
                 <p className="mb-1"><strong>Game Type:</strong> {test.gameType}</p>
-                <p className="mb-1"><strong>Exam Time:</strong> {test.examTime} minutes</p>
+                <p className="mb-1"><strong>Exam Timer:</strong> {test.examTime} minutes</p>
                 <p className="mb-1"><strong>Created By:</strong> {test.createdBy}</p>
               </div>
               <div className="flex space-x-2">

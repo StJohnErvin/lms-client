@@ -9,7 +9,7 @@ const Quiz = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(300); // 300 seconds = 5 minutes
+  const [timeLeft, setTimeLeft] = useState(0); // Start with 0 until loaded
   const location = useLocation();
   const navigate = useNavigate();
   const { state } = location;
@@ -23,7 +23,9 @@ const Quiz = () => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setQuestions(docSnap.data().questions || []);
+          const data = docSnap.data();
+          setQuestions(data.questions || []);
+          setTimeLeft(data.examTime || 300); // Set timer based on examTime
         } else {
           console.error('No such document!');
         }
@@ -71,7 +73,7 @@ const Quiz = () => {
     <div className="container mx-auto p-4">
       {!isFinished && questions.length > 0 ? (
         <div>
-          <h1 className="text-2xl mb-4">{gameType || 'Quiz'}</h1> {/* Display game type */}
+          <h1 className="text-2xl mb-4">{gameType || 'Quiz'}</h1>
           <p className="mb-2">{questions[currentQuestionIndex].question}</p>
           <div className="mb-4">
             {questions[currentQuestionIndex].options.map((option, index) => (

@@ -61,9 +61,9 @@ const CreateTest = () => {
       materialURL = await getDownloadURL(snapshot.ref);
     }
 
-    const finalData = { 
-      ...formData, 
-      createdBy: user.uid, 
+    const finalData = {
+      ...formData,
+      createdBy: user.uid,
       role: user.role,
       materialURL, // Add the material URL to the form data
     };
@@ -108,18 +108,19 @@ const CreateTest = () => {
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="examTime">
-                Exam Time
+                Exam Timer (in seconds)
               </label>
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="examTime"
                 name="examTime"
-                type="text"
+                type="number"
                 value={formData.examTime}
                 onChange={handleChange}
-                placeholder="Enter exam time"
+                placeholder="Enter exam timer in seconds"
               />
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gameType">
                 Extra Game Type
