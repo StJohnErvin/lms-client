@@ -138,17 +138,6 @@ const CreateTest = () => {
                 <option value="Who Wants to Be a Millionaire?">Who Wants to Be a Millionaire?</option>
               </select>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="materials">
-                Upload Materials
-              </label>
-              <input
-                type="file"
-                id="materials"
-                onChange={handleFileChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
             <button
               type="button"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
