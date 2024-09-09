@@ -1,4 +1,3 @@
-// src/components/GamifiedTestList.js
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db, storage } from '../firebase/firebaseConfig';
@@ -23,9 +22,15 @@ function GamifiedTestList() {
     fetchTests();
   }, []);
 
-  // Function to navigate to the quiz page for the selected test
-  const handlePlayGame = (testId, gameType) => {
-    navigate(`/quiz/${testId}`, { state: { gameType } });
+  // Function to navigate to the game page for the selected test
+  const handlePlayGame = (testId, gameType, question, answer) => {
+    if (gameType === 'Hangman') {
+      // Navigate to Hangman component with test ID, question, and answer
+      navigate(`/hangman/${testId}`, { state: { question, answer } });
+    } else {
+      // Navigate to quiz page for other game types
+      navigate(`/quiz/${testId}`, { state: { gameType } });
+    }
   };
 
   // Function to handle navigation to the Edit page
@@ -73,7 +78,7 @@ function GamifiedTestList() {
               <div className="flex space-x-2">
                 <button 
                   className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-                  onClick={() => handlePlayGame(test.id, test.gameType)}
+                  onClick={() => handlePlayGame(test.id, test.gameType, test.question, test.answer)}
                 >
                   Play Game
                 </button>

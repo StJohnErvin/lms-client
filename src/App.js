@@ -9,7 +9,7 @@ import GradeEvaluation from './components/GradeEvaluation';
 import Leaderboard from './components/Leaderboard';
 import GamifiedTestList from './components/GamifiedTestList';
 import PlayTest from './components/PlayTest';
-import HangmanGameTheme from './components/HangmanGameTheme';
+import HangmanGame from './components/HangmanGame';
 import JeopardyGameTheme from './components/JeopardyGameTheme';
 import MillionaireGameTheme from './components/MillionaireGameTheme';
 import Login from './components/Login';
@@ -47,7 +47,7 @@ function App() {
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/gamified-test" element={<GamifiedTestList />} />
               <Route path="/play-test/:testId" element={<PlayTest />} />
-              <Route path="/hangman-game" element={<HangmanGameTheme />} />
+              <Route path="/hangman/:testId" element={<HangmanGame />} />
               <Route path="/jeopardy-game" element={<JeopardyGameTheme />} />
               <Route path="/millionaire-game" element={<MillionaireGameTheme />} />
             </Routes>
