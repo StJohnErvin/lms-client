@@ -39,12 +39,7 @@ const CreateTest = () => {
     }
   };
 
-  // Handle file changes
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormData({ ...formData, materials: file });
-  };
-
+ 
   // Handle question changes
   const handleQuestionChange = (index, e) => {
     const { name, value } = e.target;
@@ -267,19 +262,6 @@ const CreateTest = () => {
             >
               Add Question
             </button>
-
-            <div className="mt-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="materials">
-                Upload Materials
-              </label>
-              <input
-                type="file"
-                id="materials"
-                onChange={handleFileChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-            </div>
-
             <div className="flex justify-between mt-6">
               <button
                 type="button"
