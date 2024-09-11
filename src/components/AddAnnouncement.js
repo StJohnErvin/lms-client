@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { db, storage } from '../firebase/firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { getAuth } from 'firebase/auth';
 
 const AddAnnouncement = () => {
   const [title, setTitle] = useState('');
@@ -12,7 +13,6 @@ const AddAnnouncement = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Allowed file types (e.g., images, PDFs, etc.)
   const allowedFileTypes = ['image/jpeg', 'image/png', 'application/pdf'];
 
   const handleAddAnnouncement = async (e) => {
@@ -20,7 +20,7 @@ const AddAnnouncement = () => {
     setIsSubmitting(true);
     setError('');
     setSuccessMessage('');
-    
+
     if (!title || !content) {
       setError('Please fill in both title and content.');
       setIsSubmitting(false);
@@ -39,12 +39,10 @@ const AddAnnouncement = () => {
       const fileRef = ref(storage, `announcements/${file.name}`);
       const uploadTask = uploadBytesResumable(fileRef, file);
 
-      // Use a promise to handle upload completion
       await new Promise((resolve, reject) => {
         uploadTask.on(
           'state_changed',
           (snapshot) => {
-            // Calculate and update upload progress
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             setUploadProgress(progress);
           },
@@ -54,7 +52,6 @@ const AddAnnouncement = () => {
             reject(uploadError);
           },
           async () => {
-            // Upload completed successfully, get download URL
             try {
               materialURL = await getDownloadURL(uploadTask.snapshot.ref);
               resolve();
@@ -69,7 +66,12 @@ const AddAnnouncement = () => {
     }
 
     try {
-      // Add announcement document to Firestore
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User is not authenticated');
+      }
+
       await addDoc(collection(db, 'announcements'), {
         title,
         content,
@@ -77,7 +79,6 @@ const AddAnnouncement = () => {
         createdAt: serverTimestamp(),
       });
 
-      // Reset form and states after successful upload
       setTitle('');
       setContent('');
       setFile(null);
@@ -105,7 +106,7 @@ const AddAnnouncement = () => {
         className="w-full mb-4 p-2 border"
         disabled={isSubmitting}
       />
-      
+
       <textarea
         placeholder="Content"
         value={content}
@@ -113,14 +114,14 @@ const AddAnnouncement = () => {
         className="w-full mb-4 p-2 border"
         disabled={isSubmitting}
       ></textarea>
-      
+
       <input
         type="file"
         onChange={(e) => setFile(e.target.files[0])}
         className="mb-4"
         disabled={isSubmitting}
       />
-      
+
       {file && (
         <p className="mb-2">File: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</p>
       )}

@@ -1,10 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase/firebaseConfig';
+import { auth, db } from '../firebase/firebaseConfig';
 import { UserContext } from '../context/UserContext';
+import { doc, getDoc } from 'firebase/firestore';
 
-function FakeLogin() {
+function Login() {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -13,36 +14,54 @@ function FakeLogin() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  async function fetchUserData(userId) {
+    try {
+      const docRef = doc(db, 'users', userId);
+      const docSnap = await getDoc(docRef);
+  
+      if (docSnap.exists()) {
+        return docSnap.data();
+      } else {
+        throw new Error('No such document!');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      throw error;
+    }
+  }
+  
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!formData.username || !formData.password) {
       setError('Please fill in all fields.');
       return;
     }
-
+  
     try {
       const userCredential = await signInWithEmailAndPassword(auth, formData.username, formData.password);
       const user = userCredential.user;
-
-      // Here you should fetch the user data from your backend or Firebase Firestore
-      // to get additional information like role. For example:
-      // const userData = await fetchUserDataFromBackend(user.uid);
-      
-      // For demonstration, we'll just include a mock role
-      const userData = { username: user.email, role: 'admin' }; // Replace this with actual role fetching
-
+      console.log('Signed in user:', user);
+  
+      // Fetch user data from Firestore
+      const userId = user.uid;
+      console.log('Fetching user data for ID:', userId);
+  
+      const userData = await fetchUserData(userId);
+      console.log('Fetched user data:', userData);
+  
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData); // Set user data including role in context
       setError('');
       navigate('/profile');
-      
     } catch (error) {
       setError('Login failed. Please check your credentials.');
       console.error('Login error:', error.message);
     }
   };
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -90,4 +109,4 @@ function FakeLogin() {
   );
 }
 
-export default FakeLogin;
+export default Login;

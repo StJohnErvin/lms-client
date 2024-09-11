@@ -22,25 +22,24 @@ const Profile = () => {
 
         let docRef;
         if (user?.role === 'admin') {
-          docRef = doc(db, 'user', userId); // Admin data
+          // Verify collection name and path
+          docRef = doc(db, 'users', userId); // Adjust if using a different path for admin
         } else {
           docRef = doc(db, 'users', userId); // Regular user data
         }
 
-        console.log('Fetching data from:', docRef.path); // Debug log
+        console.log('Fetching document from:', docRef.path);
 
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          console.log('Document data:', docSnap.data()); // Debug log
           setProfileData(docSnap.data());
         } else {
-          console.error('No such document at path:', docRef.path); // Debug log
           setError('No such document!');
         }
       } catch (err) {
-        console.error('Error fetching user data:', err.message);
         setError('Error fetching user data: ' + err.message);
+        console.error('Error fetching user data:', err);
       } finally {
         setLoading(false);
       }
@@ -61,16 +60,16 @@ const Profile = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Profile</h2>
       <div className="space-y-4">
-        <p><strong>Name:</strong> {profileData.name || 'N/A'}</p>
-        <p><strong>Email:</strong> {profileData.email || 'N/A'}</p>
-        <p><strong>Username:</strong> {profileData.username || 'N/A'}</p>
-        <p><strong>Role:</strong> {profileData.role || 'N/A'}</p>
-        {profileData.role === 'student' && (
+        <p><strong>Name:</strong> {profileData?.name || 'N/A'}</p>
+        <p><strong>Email:</strong> {profileData?.email || 'N/A'}</p>
+        <p><strong>Username:</strong> {profileData?.username || 'N/A'}</p>
+        <p><strong>Role:</strong> {profileData?.role || 'N/A'}</p>
+        {profileData?.role === 'student' && (
           <>
-            <p><strong>Student ID:</strong> {profileData.studentID || 'N/A'}</p>
-            <p><strong>Major:</strong> {profileData.major || 'N/A'}</p>
-            <p><strong>Year:</strong> {profileData.year || 'N/A'}</p>
-            <p><strong>GPA:</strong> {profileData.gpa || 'N/A'}</p>
+            <p><strong>Student ID:</strong> {profileData?.studentID || 'N/A'}</p>
+            <p><strong>Major:</strong> {profileData?.major || 'N/A'}</p>
+            <p><strong>Year:</strong> {profileData?.year || 'N/A'}</p>
+            <p><strong>GPA:</strong> {profileData?.gpa || 'N/A'}</p>
           </>
         )}
       </div>

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
-import { db, storage } from '../firebase/firebaseConfig';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db } from '../firebase/firebaseConfig';
+import { UserContext } from '../context/UserContext';
 
 const CreateTest = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -10,15 +10,10 @@ const CreateTest = () => {
     examTime: '',
     gameType: '',
     questions: [{ question: '', options: ['', '', '', ''], correctAnswer: '' }], // Default for Jeopardy and Millionaire
-    materials: null, // For uploading materials
   });
   const [errors, setErrors] = useState({ examTime: '' });
 
-  const user = {
-    uid: 'newUser', // Hardcoded user ID
-    name: 'Fake Teacher', // Hardcoded name
-    role: 'teacher', // Hardcoded role
-  };
+  const { user } = useContext(UserContext);
 
   // Handle form field changes
   const handleChange = (e) => {
@@ -39,7 +34,6 @@ const CreateTest = () => {
     }
   };
 
- 
   // Handle question changes
   const handleQuestionChange = (index, e) => {
     const { name, value } = e.target;
@@ -71,19 +65,10 @@ const CreateTest = () => {
       return;
     }
 
-    let materialURL = null;
-
-    if (formData.materials) {
-      const storageRef = ref(storage, `materials/${formData.materials.name}`);
-      const snapshot = await uploadBytes(storageRef, formData.materials);
-      materialURL = await getDownloadURL(snapshot.ref);
-    }
-
     const finalData = {
       ...formData,
-      createdBy: user.uid,
+      createdBy: user.role,
       role: user.role,
-      materialURL,
     };
 
     try {
@@ -95,7 +80,6 @@ const CreateTest = () => {
         examTime: '',
         gameType: '',
         questions: [{ question: '', options: ['', '', '', ''], correctAnswer: '' }],
-        materials: null,
       });
     } catch (error) {
       console.error('Error adding document:', error.code, error.message);
@@ -262,21 +246,13 @@ const CreateTest = () => {
             >
               Add Question
             </button>
-            <div className="flex justify-between mt-6">
-              <button
-                type="button"
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                onClick={() => setCurrentStep(1)}
-              >
-                Previous
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Submit
-              </button>
-            </div>
+
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4"
+            >
+              Submit
+            </button>
           </>
         )}
       </form>
