@@ -10,18 +10,49 @@ const Navbar = () => {
     setUser(null);
   };
 
+  const isStudent = user?.role === 'student';
+
   return (
     <nav className="bg-gray-800 p-4">
       <div className="container mx-auto flex justify-between">
         <div className="flex space-x-4">
           <Link to="/" className="text-white">Profile</Link>
-          <Link to="/account-management" className="text-white">Account Management</Link>
-          <Link to="/create-test" className="text-white">Create Test</Link>
+          
+          <Link
+            to="/account-management"
+            className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
+            aria-disabled={isStudent}
+          >
+            Account Management
+          </Link>
+
+          <Link
+            to="/create-test"
+            className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
+            aria-disabled={isStudent}
+          >
+            Create Test
+          </Link>
+
           <Link to="/grades" className="text-white">Grades</Link>
           <Link to="/leaderboard" className="text-white">Leaderboard</Link>
           <Link to="/gamified-test" className="text-white">Gamified Test</Link>
-          <Link to="/announcements" className="text-white">Announcements</Link>
-          <Link to="/add-announcement" className="text-white">Add Announcement</Link>
+
+          <Link
+            to="/announcements"
+            className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
+            aria-disabled={isStudent}
+          >
+            Announcements
+          </Link>
+
+          <Link
+            to="/add-announcement"
+            className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
+            aria-disabled={isStudent}
+          >
+            Add Announcement
+          </Link>
         </div>
         {user && (
           <button onClick={handleLogout} className="text-white">
