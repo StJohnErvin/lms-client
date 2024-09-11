@@ -1,62 +1,76 @@
-import React, { useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { UserContext } from '../context/UserContext';
 
 const Profile = () => {
   const { user } = useContext(UserContext);
+  const [profileData, setProfileData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Fake user data for display if no user context is available
-  const fakeUser = {
-    name: "John Doe",
-    email: "johndoe@example.com",
-    username: "johndoe123",
-    role: "Student",
-    studentID: "S123456",
-    major: "Computer Science",
-    year: "Sophomore",
-    gpa: "3.8",
-  };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const auth = getAuth();
+        const db = getFirestore();
+        const userId = auth.currentUser ? auth.currentUser.uid : null;
 
-  const displayUser = user || fakeUser;
+        if (!userId) {
+          throw new Error('User not authenticated');
+        }
+
+        let docRef;
+        if (user?.role === 'admin') {
+          docRef = doc(db, 'user', userId); // Admin data
+        } else {
+          docRef = doc(db, 'users', userId); // Regular user data
+        }
+
+        console.log('Fetching data from:', docRef.path); // Debug log
+
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          console.log('Document data:', docSnap.data()); // Debug log
+          setProfileData(docSnap.data());
+        } else {
+          console.error('No such document at path:', docRef.path); // Debug log
+          setError('No such document!');
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err.message);
+        setError('Error fetching user data: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
+
+  if (loading) {
+    return <div className="text-gray-600 text-center mt-4">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-600 text-center mt-4">{error}</div>;
+  }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Profile</h2>
       <div className="space-y-4">
-        <div className="flex flex-col">
-          <label className="text-gray-700 font-semibold">Name:</label>
-          <p className="text-gray-800">{displayUser.name}</p>
-        </div>
-        <div className="flex flex-col">
-          <label className="text-gray-700 font-semibold">Email:</label>
-          <p className="text-gray-800">{displayUser.email}</p>
-        </div>
-        <div className="flex flex-col">
-          <label className="text-gray-700 font-semibold">Username:</label>
-          <p className="text-gray-800">{displayUser.username}</p>
-        </div>
-        <div className="flex flex-col">
-          <label className="text-gray-700 font-semibold">Role:</label>
-          <p className="text-gray-800">{displayUser.role}</p>
-        </div>
-        {/* Conditionally render additional fields based on role */}
-        {displayUser.role === "Student" && (
+        <p><strong>Name:</strong> {profileData.name || 'N/A'}</p>
+        <p><strong>Email:</strong> {profileData.email || 'N/A'}</p>
+        <p><strong>Username:</strong> {profileData.username || 'N/A'}</p>
+        <p><strong>Role:</strong> {profileData.role || 'N/A'}</p>
+        {profileData.role === 'student' && (
           <>
-            <div className="flex flex-col">
-              <label className="text-gray-700 font-semibold">Student ID:</label>
-              <p className="text-gray-800">{displayUser.studentID}</p>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-gray-700 font-semibold">Major:</label>
-              <p className="text-gray-800">{displayUser.major}</p>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-gray-700 font-semibold">Year:</label>
-              <p className="text-gray-800">{displayUser.year}</p>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-gray-700 font-semibold">GPA:</label>
-              <p className="text-gray-800">{displayUser.gpa}</p>
-            </div>
+            <p><strong>Student ID:</strong> {profileData.studentID || 'N/A'}</p>
+            <p><strong>Major:</strong> {profileData.major || 'N/A'}</p>
+            <p><strong>Year:</strong> {profileData.year || 'N/A'}</p>
+            <p><strong>GPA:</strong> {profileData.gpa || 'N/A'}</p>
           </>
         )}
       </div>

@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 import { UserContext } from '../context/UserContext';
+import { auth, db } from '../firebase/firebaseConfig';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 const AccountManagement = () => {
   const { user } = useContext(UserContext);
@@ -30,12 +32,22 @@ const AccountManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Send user data to backend API
-      const res = await axios.post('/api/users', formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+      // Create a new user with Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+
+      // Get user UID
+      const userId = userCredential.user.uid;
+
+      // Save additional user data in Firestore
+      await setDoc(doc(db, 'users', userId), {
+        name: formData.name,
+        age: formData.age,
+        username: formData.username,
+        gender: formData.gender,
+        address: formData.address,
+        role: formData.role,
       });
+
       alert('User created successfully');
       setFormData({
         name: '',
