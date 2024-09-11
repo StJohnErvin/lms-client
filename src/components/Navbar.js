@@ -1,9 +1,10 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
 
 const Navbar = () => {
   const { user, setUser } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -12,47 +13,51 @@ const Navbar = () => {
 
   const isStudent = user?.role === 'student';
 
+  const handleClick = (path) => {
+    if (isStudent) {
+      // Prevent navigation for students
+      return;
+    }
+    navigate(path);
+  };
+
   return (
     <nav className="bg-gray-800 p-4">
       <div className="container mx-auto flex justify-between">
         <div className="flex space-x-4">
           <Link to="/" className="text-white">Profile</Link>
           
-          <Link
-            to="/account-management"
+          <span
+            onClick={() => handleClick('/account-management')}
             className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
-            aria-disabled={isStudent}
           >
             Account Management
-          </Link>
+          </span>
 
-          <Link
-            to="/create-test"
+          <span
+            onClick={() => handleClick('/create-test')}
             className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
-            aria-disabled={isStudent}
           >
             Create Test
-          </Link>
+          </span>
 
           <Link to="/grades" className="text-white">Grades</Link>
           <Link to="/leaderboard" className="text-white">Leaderboard</Link>
           <Link to="/gamified-test" className="text-white">Gamified Test</Link>
 
-          <Link
-            to="/announcements"
+          <span
+            onClick={() => handleClick('/announcements')}
             className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
-            aria-disabled={isStudent}
           >
             Announcements
-          </Link>
+          </span>
 
-          <Link
-            to="/add-announcement"
+          <span
+            onClick={() => handleClick('/add-announcement')}
             className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
-            aria-disabled={isStudent}
           >
             Add Announcement
-          </Link>
+          </span>
         </div>
         {user && (
           <button onClick={handleLogout} className="text-white">

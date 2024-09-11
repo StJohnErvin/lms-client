@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db, storage } from '../firebase/firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import { ref, deleteObject } from 'firebase/storage';
+import { UserContext } from '../context/UserContext';
 
 function GamifiedTestList() {
   const [tests, setTests] = useState([]);
+  const { user } = useContext(UserContext); // Get user context
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,18 +84,22 @@ function GamifiedTestList() {
                 >
                   Play Game
                 </button>
-                <button 
-                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
-                  onClick={() => handleEditTest(test.id)}
-                >
-                  Edit
-                </button>
-                <button 
-                  className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
-                  onClick={() => handleDeleteTest(test.id, test.materialURL)}
-                >
-                  Delete
-                </button>
+                {user.role !== 'student' && (
+                  <>
+                    <button 
+                      className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                      onClick={() => handleEditTest(test.id)}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+                      onClick={() => handleDeleteTest(test.id, test.materialURL)}
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
               </div>
             </li>
           ))}
