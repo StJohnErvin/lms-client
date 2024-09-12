@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import React, { useEffect, useState, useContext } from 'react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { db } from '../firebase/firebaseConfig';
+import { UserContext } from '../context/UserContext'; // Import UserContext
 
 const Quiz = () => {
   const [questions, setQuestions] = useState([]);
@@ -9,11 +10,12 @@ const Quiz = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0); // Start with 0 until loaded
+  const [timeLeft, setTimeLeft] = useState(300); // Initialize with 5 minutes (300 seconds)
   const location = useLocation();
   const navigate = useNavigate();
   const { state } = location;
   const { gameType } = state || {};
+  const { user } = useContext(UserContext); // Access user context
 
   useEffect(() => {
     const fetchTest = async () => {
@@ -38,20 +40,40 @@ const Quiz = () => {
   }, [location]);
 
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (!isFinished) {
-      navigate('/profile'); // Redirect to Profile when time runs out
+    let timer;
+    if (timeLeft > 0 && !isFinished) {
+      timer = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            setIsFinished(true);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    } else if (isFinished) {
+      const saveScore = async () => {
+        try {
+          const userId = user?.id || 'guest'; // Use user ID from context or a default value
+          await setDoc(doc(db, 'scores', userId), { score, testId: location.pathname.split('/').pop() });
+        } catch (error) {
+          console.error('Error saving score:', error);
+        }
+      };
+      saveScore();
+      navigate('/profile'); // Navigate to profile when finished
     }
-  }, [timeLeft, navigate, isFinished]);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, isFinished, navigate, score, location, user]); // Add user to dependency array
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
   };
 
   const handleNextQuestion = () => {
-    if (selectedOption === questions[currentQuestionIndex].answer) {
+    if (selectedOption === questions[currentQuestionIndex].correctAnswer) {
       setScore(score + 1);
     }
 
@@ -64,9 +86,12 @@ const Quiz = () => {
   };
 
   const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    if (isNaN(seconds) || seconds < 0) {
+      return '00:00'; // Handle invalid or negative values
+    }
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   const renderCompletionMessage = () => {
@@ -92,9 +117,7 @@ const Quiz = () => {
             {questions[currentQuestionIndex].options.map((option, index) => (
               <button
                 key={index}
-                className={`block w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 mb-2 ${
-                  selectedOption === option ? 'bg-blue-700' : ''
-                }`}
+                className={`block w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 mb-2 ${selectedOption === option ? 'bg-blue-700' : ''}`}
                 onClick={() => handleOptionSelect(option)}
               >
                 {option}

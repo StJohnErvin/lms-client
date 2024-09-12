@@ -1,11 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { collection, getDocs, getDoc } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
 
 const GradeEvaluation = () => {
-  const grades = [
-    { id: 1, student: 'John Doe', grade: 'A' },
-    { id: 2, student: 'Jane Smith', grade: 'B' },
-    { id: 3, student: 'Alice Johnson', grade: 'A-' },
-  ];
+  const [grades, setGrades] = useState([]);
+
+  useEffect(() => {
+    const fetchGrades = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'scores'));
+        const gradesList = await Promise.all(
+          querySnapshot.docs.map(async (doc) => {
+            const data = doc.data();
+            const userDocRef = doc(db, 'users', data.userId); // Ensure userId exists in score documents
+            const userDocSnap = await getDoc(userDocRef);
+
+            const userName = userDocSnap.exists() ? userDocSnap.data().name : 'Unknown';
+
+            return { id: doc.id, student: userName, score: data.score };
+          })
+        );
+
+        // Sort grades alphabetically by student name
+        const sortedGrades = gradesList.sort((a, b) => {
+          const nameA = a.student ? a.student.toLowerCase() : '';
+          const nameB = b.student ? b.student.toLowerCase() : '';
+          return nameA.localeCompare(nameB);
+        });
+
+        setGrades(sortedGrades);
+      } catch (error) {
+        console.error('Error fetching grades:', error);
+      }
+    };
+
+    fetchGrades();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -14,8 +44,8 @@ const GradeEvaluation = () => {
         <ul className="divide-y divide-gray-200">
           {grades.map(record => (
             <li key={record.id} className="py-4 flex justify-between">
-              <span className="text-gray-700 font-bold">{record.student}</span>
-              <span className="text-gray-500">{record.grade}</span>
+              <span className="text-gray-700 font-bold">{record.student || 'Unknown'}</span>
+              <span className="text-gray-500">{record.score || 'No score'}</span>
             </li>
           ))}
         </ul>

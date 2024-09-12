@@ -26,14 +26,22 @@ function GamifiedTestList() {
 
   // Function to navigate to the game page for the selected test
   const handlePlayGame = (testId, gameType, question, answer) => {
+    if (!testId) {
+      console.error('Test ID is missing');
+      return;
+    }
+  
     if (gameType === 'Hangman') {
-      // Navigate to Hangman component with test ID, question, and answer
-      navigate(`/hangman/${testId}`, { state: { question, answer } });
+      if (question && answer) {
+        navigate(`/hangman/${testId}`, { state: { question, answer } });
+      } else {
+        console.error('Question or answer is missing');
+      }
     } else {
-      // Navigate to quiz page for other game types
       navigate(`/quiz/${testId}`, { state: { gameType } });
     }
   };
+  
 
   // Function to handle navigation to the Edit page
   const handleEditTest = (testId) => {

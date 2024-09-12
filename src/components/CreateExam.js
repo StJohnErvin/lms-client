@@ -38,7 +38,14 @@ const CreateTest = () => {
   const handleQuestionChange = (index, e) => {
     const { name, value } = e.target;
     const updatedQuestions = [...formData.questions];
-    updatedQuestions[index][name] = value;
+
+    if (name.startsWith('options')) {
+      const optionIndex = parseInt(name.split('-')[1], 10);
+      updatedQuestions[index].options[optionIndex] = value;
+    } else {
+      updatedQuestions[index][name] = value;
+    }
+
     setFormData({ ...formData, questions: updatedQuestions });
   };
 
@@ -119,14 +126,14 @@ const CreateTest = () => {
                 type="text"
                 value={formData.examTime}
                 onChange={handleChange}
-                placeholder="Enter exam timer (MM:SS)"
+                placeholder="Enter exam time"
               />
               {errors.examTime && <p className="text-red-500 text-xs italic">{errors.examTime}</p>}
             </div>
 
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gameType">
-                Extra Game Type
+                Game Type
               </label>
               <select
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -143,8 +150,8 @@ const CreateTest = () => {
             </div>
 
             <button
-              type="button"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="button"
               onClick={() => setCurrentStep(2)}
             >
               Next
@@ -154,102 +161,86 @@ const CreateTest = () => {
 
         {currentStep === 2 && (
           <>
-            {formData.gameType === 'Hangman' ? (
-              formData.questions.map((question, qIndex) => (
-                <div key={qIndex} className="mb-6">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor={`question-${qIndex}`}>
-                    Hangman Question {qIndex + 1}
+            <div className="mb-4">
+              <h2 className="text-xl font-bold mb-4">Questions</h2>
+              {formData.questions.map((question, index) => (
+                <div key={index} className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor={`question-${index}`}>
+                    Question {index + 1}
                   </label>
                   <input
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id={`question-${qIndex}`}
+                    id={`question-${index}`}
                     name="question"
                     type="text"
                     value={question.question}
-                    onChange={(e) => handleQuestionChange(qIndex, e)}
+                    onChange={(e) => handleQuestionChange(index, e)}
                     placeholder="Enter the question"
                   />
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor={`answer-${qIndex}`}>
-                    Hangman Answer
-                  </label>
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id={`answer-${qIndex}`}
-                    name="answer"
-                    type="text"
-                    value={question.answer}
-                    onChange={(e) => handleQuestionChange(qIndex, e)}
-                    placeholder="Enter the answer"
-                  />
-                </div>
-              ))
-            ) : (
-              formData.questions.map((question, qIndex) => (
-                <div key={qIndex} className="mb-6">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor={`question-${qIndex}`}>
-                    Question {qIndex + 1}
-                  </label>
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id={`question-${qIndex}`}
-                    name="question"
-                    type="text"
-                    value={question.question}
-                    onChange={(e) => handleQuestionChange(qIndex, e)}
-                    placeholder="Enter the question"
-                  />
+
                   {formData.gameType !== 'Hangman' && (
                     <>
-                      <label className="block text-gray-700 text-sm font-bold mb-2">
-                        Options
-                      </label>
-                      {question.options.map((option, oIndex) => (
-                        <input
-                          key={oIndex}
-                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
-                          type="text"
-                          name="options"
-                          value={option}
-                          onChange={(e) =>
-                            handleQuestionChange(qIndex, {
-                              target: {
-                                name: 'options',
-                                value: [...question.options.slice(0, oIndex), e.target.value, ...question.options.slice(oIndex + 1)],
-                              },
-                            })
-                          }
-                          placeholder={`Option ${oIndex + 1}`}
-                        />
+                      {['A', 'B', 'C', 'D'].map((option, idx) => (
+                        <div key={option} className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mt-4" htmlFor={`option${option}-${index}`}>
+                            Option {option}
+                          </label>
+                          <input
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id={`option${option}-${index}`}
+                            name={`options-${idx}`}
+                            type="text"
+                            value={question.options[idx]}
+                            onChange={(e) => handleQuestionChange(index, e)}
+                            placeholder={`Option ${option}`}
+                          />
+                        </div>
                       ))}
-                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor={`correctAnswer-${qIndex}`}>
+
+                      <label className="block text-gray-700 text-sm font-bold mt-4" htmlFor={`correctAnswer-${index}`}>
                         Correct Answer
                       </label>
                       <input
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id={`correctAnswer-${qIndex}`}
+                        id={`correctAnswer-${index}`}
                         name="correctAnswer"
                         type="text"
                         value={question.correctAnswer}
-                        onChange={(e) => handleQuestionChange(qIndex, e)}
+                        onChange={(e) => handleQuestionChange(index, e)}
                         placeholder="Enter the correct answer"
                       />
                     </>
                   )}
+
+                  {formData.gameType === 'Hangman' && (
+                    <>
+                      <label className="block text-gray-700 text-sm font-bold mt-4" htmlFor={`answer-${index}`}>
+                        Answer
+                      </label>
+                      <input
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id={`answer-${index}`}
+                        name="answer"
+                        type="text"
+                        value={question.answer}
+                        onChange={(e) => handleQuestionChange(index, e)}
+                        placeholder="Enter the answer"
+                      />
+                    </>
+                  )}
                 </div>
-              ))
-            )}
-
+              ))}
+              <button
+                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                type="button"
+                onClick={handleAddQuestion}
+              >
+                Add Question
+              </button>
+            </div>
             <button
-              type="button"
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              onClick={handleAddQuestion}
-            >
-              Add Question
-            </button>
-
-            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4"
             >
               Submit
             </button>
