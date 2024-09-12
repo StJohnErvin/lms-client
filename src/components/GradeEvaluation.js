@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, getDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
 
 const GradeEvaluation = () => {
@@ -9,17 +9,7 @@ const GradeEvaluation = () => {
     const fetchGrades = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'scores'));
-        const gradesList = await Promise.all(
-          querySnapshot.docs.map(async (doc) => {
-            const data = doc.data();
-            const userDocRef = doc(db, 'users', data.userId); // Ensure userId exists in score documents
-            const userDocSnap = await getDoc(userDocRef);
-
-            const userName = userDocSnap.exists() ? userDocSnap.data().name : 'Unknown';
-
-            return { id: doc.id, student: userName, score: data.score };
-          })
-        );
+        const gradesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Sort grades alphabetically by student name
         const sortedGrades = gradesList.sort((a, b) => {
