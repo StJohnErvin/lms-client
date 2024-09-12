@@ -26,7 +26,7 @@ const Navbar = () => {
       <div className="container mx-auto flex justify-between">
         <div className="flex space-x-4">
           <Link to="/" className="text-white">Profile</Link>
-          
+
           <span
             onClick={() => handleClick('/account-management')}
             className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
@@ -44,13 +44,7 @@ const Navbar = () => {
           <Link to="/grades" className="text-white">Grades</Link>
           <Link to="/leaderboard" className="text-white">Leaderboard</Link>
           <Link to="/gamified-test" className="text-white">Gamified Test</Link>
-
-          <span
-            onClick={() => handleClick('/announcements')}
-            className={`text-white ${isStudent ? 'cursor-not-allowed opacity-50' : ''}`}
-          >
-            Announcements
-          </span>
+          <Link to="/announcements" className='text-white '>Announcements</Link>
 
           <span
             onClick={() => handleClick('/add-announcement')}

@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
+import { UserContext } from '../context/UserContext';
 
 const AnnouncementPage = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [editMode, setEditMode] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -56,7 +58,7 @@ const AnnouncementPage = () => {
     if (!url) return <p>No attachment</p>;
 
     const fileExtension = url.split('.').pop().toLowerCase();
-    
+
     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
       return <img src={url} alt="Attachment" className="w-full h-auto" />;
     } else if (['pdf'].includes(fileExtension)) {
@@ -65,6 +67,8 @@ const AnnouncementPage = () => {
       return <a href={url} target="_blank" rel="noopener noreferrer">Download Attachment</a>;
     }
   };
+
+  const isStudent = user?.role === 'student';
 
   return (
     <div className="container mx-auto p-4">
@@ -105,24 +109,26 @@ const AnnouncementPage = () => {
                 <div className="mt-2">
                   {renderAttachment(announcement.materialURL)}
                 </div>
-                <div className="mt-2">
-                  <button
-                    onClick={() => {
-                      setEditMode(announcement.id);
-                      setEditTitle(announcement.title);
-                      setEditContent(announcement.content);
-                    }}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(announcement.id)}
-                    className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
-                  >
-                    Delete
-                  </button>
-                </div>
+                {!isStudent && (
+                  <div className="mt-2">
+                    <button
+                      onClick={() => {
+                        setEditMode(announcement.id);
+                        setEditTitle(announcement.title);
+                        setEditContent(announcement.content);
+                      }}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(announcement.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </li>
